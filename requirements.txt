@@ -1,4 +1,4 @@
 pandas
 numpy 
 sciket learn 
-seaborn 
+seaborn  
