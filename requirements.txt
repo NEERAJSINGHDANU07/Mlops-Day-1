@@ -2,3 +2,5 @@ pandas
 numpy 
 sciket learn 
 seaborn  
+matplotlib
+mlflow

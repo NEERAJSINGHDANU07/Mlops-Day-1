@@ -1,12 +1,24 @@
 import pandas as pd
-import joblib
-import pandas as pd
+import mlflow
 import numpy as np
+import mlflow.sklearn
 
-model = joblib.load("D:\MLops Day 1\Models\linear_reg_model.pkl")
+# MLflow tracking URI
+mlflow.set_tracking_uri("sqlite:///mlflow.db")
 
-new_data = pd.DataFrame([[123, 56, 89]])
+# Load Champion model from MLflow Model Registry
+model = mlflow.sklearn.load_model(
+    "models:/Sales_prediction_Model@champion"
+)
 
+# New observation
+new_data = pd.DataFrame({
+    "TV": [35],
+    "Radio": [50000],
+    "Newspaper": [8]
+})
+
+# Prediction
 prediction = model.predict(new_data)
 
-print("Predicted Sales: ", prediction)
+print("Predicted Sales:", prediction[0])

@@ -20,4 +20,4 @@ model = LinearRegression()
 model.fit(xtrain, ytrain)
 
 # Model dump
-joblib.dump(model, r"D:\MLops Day 1\Models\linear_reg_model.pkl")
+joblib.dump(model, r"D:\MLops Day 1\Models\linear_reg_model.pkl") 
