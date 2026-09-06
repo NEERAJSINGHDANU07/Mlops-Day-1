@@ -26,6 +26,10 @@ jobs:
           pip install -r requirements.txt
           pip install pytest 
 
+      - name: Upgrade MLflow Database Schema
+        run: |
+          mlflow db upgrade sqlite:///mlflow.db || true
+
       - name: Train Model to Generate Champion Model
         run: |
           python src/train.py
