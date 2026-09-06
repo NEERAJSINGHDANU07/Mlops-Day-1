@@ -1,8 +1,6 @@
 pandas
-numpy 
-sciket learn 
-seaborn  
-matplotlib
 mlflow
+scikit-learn
+joblib
+pytest
 streamlit
-pytest 
