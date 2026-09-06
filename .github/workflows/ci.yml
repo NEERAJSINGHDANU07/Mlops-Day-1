@@ -28,7 +28,7 @@ jobs:
 
       - name: Train Model to Generate Champion Model
         run: |
-          python src/Train.py
+          python src/train.py
 
       - name: Run Pytest Validation Suite
         run: pytest tests/
