@@ -11,12 +11,15 @@ from sklearn.metrics import root_mean_squared_error
 # Set dynamic project root path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(BASE_DIR, "data", "data.csv")
-DB_PATH = os.path.join(BASE_DIR, "mlflow.db")
 MODELS_DIR = os.path.join(BASE_DIR, "models")
-os.makedirs(MODELS_DIR, exist_ok=True)  # Fixed typo: os.makedirs
+os.makedirs(MODELS_DIR, exist_ok=True)
 
-# Tracking setup
-mlflow.set_tracking_uri(f"sqlite:///{DB_PATH}")  # Used dynamic path DB_PATH
+# Dynamic tracking setup (CI/CD compatible)
+# CI environment me MLFLOW_TRACKING_URI set hoga (e.g., sqlite://), otherwise local db path use hoga
+DEFAULT_DB = os.path.join(BASE_DIR, "mlflow.db")
+TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", f"sqlite:///{DEFAULT_DB}")
+mlflow.set_tracking_uri(TRACKING_URI)
+
 experiment_name = "Advertising_Sale_Regression"
 registered_model_name = "Sales_prediction_Model"
 mlflow.set_experiment(experiment_name)
@@ -64,13 +67,13 @@ print(f"Best batch run {best_run_id} registered as challenger (v{challenger_vers
 try:
     champion_info = client.get_model_version_by_alias(registered_model_name, "champion")
     champion_run = client.get_run(champion_info.run_id)
-    champion_rmse = champion_run.data.metrics["test_rmse"]  # Fixed: metrics
+    champion_rmse = champion_run.data.metrics["test_rmse"]
     champion_version = champion_info.version
 
     print(f"Current Champion: Version {champion_version} (RMSE: {champion_rmse:.4f})")
 
     if best_rmse < champion_rmse:
-        client.set_registered_model_alias(registered_model_name, "champion", challenger_version)  # Fixed space/typo
+        client.set_registered_model_alias(registered_model_name, "champion", challenger_version)
         print(f"Title Change! Challenger (v{challenger_version}) defeated Champion (v{champion_version})")
     else:
         print(f"Defended! Champion (v{champion_version}) retains its title.")
