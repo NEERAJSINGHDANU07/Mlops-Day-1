@@ -4,3 +4,5 @@ sciket learn
 seaborn  
 matplotlib
 mlflow
+streamlit
+pytest 
