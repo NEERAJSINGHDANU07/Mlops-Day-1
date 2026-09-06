@@ -4,9 +4,7 @@ on:
   push:
     branches: [ main ]
     paths-ignore:
-      - 'data/**'
       - 'src/train_mlflow.py'
-      - 'src/Train.py'
   workflow_dispatch:
 
 jobs:
@@ -27,6 +25,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest 
+
+      - name: Train Model to Generate Champion Model
+        run: |
+          python src/Train.py
 
       - name: Run Pytest Validation Suite
         run: pytest tests/
