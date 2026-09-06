@@ -6,7 +6,7 @@ on:
     paths-ignore:
       - 'data/**'
       - 'src/train_mlflow.py'
-      - 'src/train.py'
+      - 'src/Train.py'
   workflow_dispatch:
 
 jobs:
@@ -14,19 +14,20 @@ jobs:
     runs-on: ubuntu-latest 
     steps:
       - name: Checkout Code
-        uses : action/checkout@v4
+        uses: actions/checkout@v4
 
-      - name : set up python 
+      - name: Set up Python 
         uses: actions/setup-python@v5
         with: 
           python-version: '3.13'
           cache: 'pip'
 
       - name: Install Dependencies 
-        run:
+        run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest 
+
       - name: Run Pytest Validation Suite
         run: pytest tests/
 
