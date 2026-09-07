@@ -50,7 +50,7 @@ models = {
     "Random_Forest": RandomForestRegressor(max_depth=5, random_state=42)
 }
 
-batch_runs = []
+batch_runs = {}
 for name, model in models.items():
     with mlflow.start_run(run_name=name) as run:
         model.fit(xtrain, ytrain)
@@ -59,11 +59,11 @@ for name, model in models.items():
         mlflow.log_param("model_type", name)
         mlflow.log_metric("test_rmse", rmse)
         mlflow.sklearn.log_model(model, artifact_path="model")
-        batch_runs.append((run.info.run_id, rmse))
+        batch_runs[run.info.run_id] = (model, rmse)
 
-# Find the best model
-batch_runs.sort(key=lambda x: x[1])  # Sort by lowest RMSE
-best_run_id, best_rmse = batch_runs[0]
+# Find the best model object and run ID
+best_run_id = min(batch_runs, key=lambda k: batch_runs[k][1])
+best_model, best_rmse = batch_runs[best_run_id]
 
 # Register winning model as challenger
 client = MlflowClient()
@@ -78,6 +78,8 @@ client.set_registered_model_alias(registered_model_name, "challenger", challenge
 print(f"Best batch run {best_run_id} registered as challenger (v{challenger_version}, RMSE: {best_rmse:.4f})")
 
 # Challenger vs Champion evaluation gate
+champion_export_model = best_model  # Default fallback
+
 try:
     champion_info = client.get_model_version_by_alias(registered_model_name, "champion")
     champion_run = client.get_run(champion_info.run_id)
@@ -88,20 +90,23 @@ try:
 
     if best_rmse < champion_rmse:
         client.set_registered_model_alias(registered_model_name, "champion", challenger_version)
+        champion_export_model = best_model
         print(f"Title Change! Challenger (v{challenger_version}) defeated Champion (v{champion_version})")
     else:
         print(f"Defended! Champion (v{champion_version}) retains its title.")
+        try:
+            champion_model_uri = f"models:/{registered_model_name}@champion"
+            champion_export_model = mlflow.sklearn.load_model(champion_model_uri)
+        except Exception:
+            champion_export_model = best_model
 except Exception:
     # First time running
     client.set_registered_model_alias(registered_model_name, "champion", challenger_version)
+    champion_export_model = best_model
     print(f"No existing champion found. Version {challenger_version} crowned as first Champion!")
 
-# Load current champion from MLflow registry
-champion_model_uri = f"models:/{registered_model_name}@champion"
-champion_model = mlflow.sklearn.load_model(champion_model_uri)
-
-# Save standalone champion artifact
+# Save standalone champion artifact safely
 champion_export_path = os.path.join(MODELS_DIR, "champion_model.pkl")
-joblib.dump(champion_model, champion_export_path)
+joblib.dump(champion_export_model, champion_export_path)
 
 print(f"Exported registry champion model to {champion_export_path}")
