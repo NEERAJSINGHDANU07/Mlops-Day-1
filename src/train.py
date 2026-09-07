@@ -105,8 +105,11 @@ except Exception:
     champion_export_model = best_model
     print(f"No existing champion found. Version {challenger_version} crowned as first Champion!")
 
-# Save standalone champion artifact safely
-champion_export_path = os.path.join(MODELS_DIR, "champion_model.pkl")
-joblib.dump(champion_export_model, champion_export_path)
+# Save standalone champion artifact safely for BOTH naming formats
+champion_export_path_underscore = os.path.join(MODELS_DIR, "champion_model.pkl")
+champion_export_path_hyphen = os.path.join(MODELS_DIR, "champion-model.pkl")
 
-print(f"Exported registry champion model to {champion_export_path}")
+joblib.dump(champion_export_model, champion_export_path_underscore)
+joblib.dump(champion_export_model, champion_export_path_hyphen)
+
+print(f"Exported champion model to {champion_export_path_underscore} and {champion_export_path_hyphen}")
