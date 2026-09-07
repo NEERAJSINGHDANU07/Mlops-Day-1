@@ -26,8 +26,3 @@ Thumbs.db
 build/
 dist/
 *.egg-info/
-
-# MLflow tracking files & database
-mlflow.db
-mlruns/
-*.db
