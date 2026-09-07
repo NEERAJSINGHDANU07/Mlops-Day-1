@@ -10,12 +10,16 @@ from sklearn.metrics import root_mean_squared_error
 
 # Set dynamic project root path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_PATH = os.path.join(BASE_DIR, "Data", "data.csv")
+
+# Case-insensitive data path resolution
+data_file_path = os.path.join(BASE_DIR, "Data", "data.csv")
+if not os.path.exists(data_file_path):
+    data_file_path = os.path.join(BASE_DIR, "data", "data.csv")
+
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 # Dynamic tracking setup (CI/CD compatible)
-# CI environment me MLFLOW_TRACKING_URI set hoga (e.g., sqlite://), otherwise local db path use hoga
 DEFAULT_DB = os.path.join(BASE_DIR, "mlflow.db")
 TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", f"sqlite:///{DEFAULT_DB}")
 mlflow.set_tracking_uri(TRACKING_URI)
@@ -24,9 +28,19 @@ experiment_name = "Advertising_Sale_Regression"
 registered_model_name = "Sales_prediction_Model"
 mlflow.set_experiment(experiment_name)
 
-# Data preparation
-df = pd.read_csv(DATA_PATH)
-X, y = df[["TV", "Radio", "Newspaper"]], df["Sales"]
+# Data loading & preprocessing
+df = pd.read_csv(data_file_path)
+
+# Handle missing values and type conversion
+feature_cols = ["TV", "Radio", "Newspaper"]
+target_col = "Sales"
+
+for col in feature_cols + [target_col]:
+    df[col] = pd.to_numeric(df[col], errors="coerce")
+
+df = df.dropna(subset=feature_cols + [target_col])
+
+X, y = df[feature_cols], df[target_col]
 xtrain, xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Train candidate models
