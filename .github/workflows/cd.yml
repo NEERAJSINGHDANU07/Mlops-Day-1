@@ -42,5 +42,5 @@ jobs:
         run: |
           aws ecs update-service \
             --cluster default \
-            --service streamlit-mlops-app-a37b \
+            --service streamlit-mlops-app-7664 \
             --force-new-deployment
