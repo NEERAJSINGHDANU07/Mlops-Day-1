@@ -3,8 +3,8 @@ name: CT Pipeline
 on:
   push:
     paths:
-      - 'data/**'
-      - 'src/Train.py'
+      - 'Data/**'
+      - 'src/train.py'
     branches: [ main ]
   workflow_dispatch:
 
@@ -32,7 +32,7 @@ jobs:
 
       - name: Retrain Model & Update MLflow Registry
         run: |
-          python src/Train.py
+          python src/train.py
 
       - name: Commit Updated MLflow Database and Artifacts
         run: |
