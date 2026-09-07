@@ -32,6 +32,7 @@ jobs:
 
       - name: Retrain Model & Update MLflow Registry
         run: |
+          mlflow db upgrade sqlite:///mlflow.db || true
           python src/train.py
 
       - name: Commit Updated MLflow Database and Artifacts
@@ -47,6 +48,7 @@ jobs:
             git commit -m "Automated model retraining (MLflow Champion Update)"
             git push
           fi
+
       - name: Trigger CI Validation Pipeline 
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
